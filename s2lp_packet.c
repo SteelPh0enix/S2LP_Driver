@@ -205,6 +205,18 @@ void S2LP_PCKT_SetAutoPacketFilteringState(S2LP_Handle* handle, bool enabled) {
 	S2LP_WriteRegister(handle, S2LP_REG_PROTOCOL1, reg_val);
 }
 
+void S2LP_PCKT_SetDestinationAddressFilteringState(S2LP_Handle* handle, bool enabled) {
+	uint8_t reg_val = S2LP_ReadRegister(handle, S2LP_REG_PCKT_FLT_OPTIONS);
+
+	if (enabled) {
+		SETBIT(reg_val, 1);
+	} else {
+		CLEARBIT(reg_val, 1);
+	}
+
+	S2LP_WriteRegister(handle, S2LP_REG_PCKT_FLT_OPTIONS, reg_val);
+}
+
 S2LP_Packet_Format S2LP_PCKT_GetPacketFormat(S2LP_Handle* handle) {
 	uint8_t const reg_val = S2LP_ReadRegister(handle, S2LP_REG_PCKTCTRL3);
 	return (S2LP_Packet_Format) GETBITS(reg_val, 0b11, 6);

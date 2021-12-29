@@ -32,6 +32,7 @@ void S2LP_Power_SetBLDThreshold(S2LP_Handle* handle,
         S2LP_BLD_Threshold threshold);
 // Set SMPS level mode (should the output level apply to both RX and TX, or just for TX)
 void S2LP_Power_SetSMPSLevelMode(S2LP_Handle* handle, S2LP_SMPS_Level_Mode mode);
+// Set FIR state (used to smooth the OOK signal)
 void S2LP_Power_SetFIRState(S2LP_Handle* handle, bool enabled);
 
 // Configuration values getters

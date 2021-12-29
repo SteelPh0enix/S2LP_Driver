@@ -197,10 +197,10 @@ uint32_t S2LP_Utils_CRCToInt(S2LP_CRC_Mode crc_mode) {
 	}
 }
 
-int8_t S2LP_Utils_RSSITodBm(uint8_t rssi) {
-	return (int8_t) (((int16_t) rssi) - S2LP_RSSI_DBM_OFFSET);
+int16_t S2LP_Utils_RSSITodBm(uint8_t rssi) {
+	return ((int16_t) rssi) - (int16_t)S2LP_RSSI_DBM_OFFSET;
 }
 
-uint8_t S2LP_Utils_dBmToRSSI(int8_t dbm) {
-	return (uint8_t) (((int16_t) dbm) + S2LP_RSSI_DBM_OFFSET);
+int16_t S2LP_Utils_dBmToRSSI(int8_t dbm) {
+	return ((int16_t) dbm) + (int16_t)S2LP_RSSI_DBM_OFFSET;
 }

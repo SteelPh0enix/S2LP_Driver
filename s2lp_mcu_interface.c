@@ -40,10 +40,12 @@ void S2LP_GetPin(S2LP_Handle* handle, S2LP_Pin pin, GPIO_TypeDef** port_out, uin
 			*port_out = handle->gpio_csn_port;
 			*pin_out = handle->gpio_csn_pin;
 			break;
+#ifndef S2LP_SOFTWARE_RESET
 		case S2LP_PIN_SDN:
 			*port_out = handle->gpio_sdn_port;
 			*pin_out = handle->gpio_sdn_pin;
 			break;
+#endif
 		case S2LP_PIN_GPIO_0:
 			*port_out = handle->gpio_port[0];
 			*pin_out = handle->gpio_pin[0];
@@ -100,8 +102,10 @@ void S2LP_Write(S2LP_Handle* handle, uint8_t address, size_t length) {
 	handle->tx_buffer[1] = address;
 
 	// ACTUAL PLATFORM CODE START
+	taskENTER_CRITICAL();
 	HAL_SPI_TransmitReceive(handle->spi, &(handle->tx_buffer[0]), &(handle->rx_buffer[0]), (uint16_t) (length + 2),
 	HAL_MAX_DELAY);
+	taskEXIT_CRITICAL();
 	// ACTUAL PLATFORM CODE END
 
 	// First two bytes are S2-LP status bits, so we copy them (in reverse order)
@@ -114,8 +118,10 @@ void S2LP_Read(S2LP_Handle* handle, uint8_t address, size_t amount) {
 	handle->tx_buffer[1] = address;
 
 	// ACTUAL PLATFORM CODE START
+	taskENTER_CRITICAL();
 	HAL_SPI_TransmitReceive(handle->spi, &(handle->tx_buffer[0]), &(handle->rx_buffer[0]), (uint16_t) (amount + 2),
 	HAL_MAX_DELAY);
+	taskEXIT_CRITICAL();
 	// ACTUAL PLATFORM CODE END
 
 	handle->status[0] = handle->rx_buffer[1];
@@ -128,8 +134,10 @@ void S2LP_SendCommand(S2LP_Handle* handle, uint8_t command) {
 
 	// ACTUAL PLATFORM CODE START
 	S2LP_Select(handle);
+	taskENTER_CRITICAL();
 	HAL_SPI_TransmitReceive(handle->spi, &(handle->tx_buffer[0]), &(handle->rx_buffer[0]), 2,
 	HAL_MAX_DELAY);
+	taskEXIT_CRITICAL();
 	S2LP_Deselect(handle);
 	// ACTUAL PLATFORM CODE END
 
@@ -174,12 +182,17 @@ void S2LP_Deselect(S2LP_Handle* handle) {
 }
 
 void S2LP_Reset(S2LP_Handle* handle) {
+#ifndef S2LP_SOFTWARE_RESET
 	S2LP_Shutdown(handle);
 	S2LP_Delay(S2LP_RESET_TIMEOUT);
 	S2LP_Wakeup(handle);
 	S2LP_Delay(S2LP_RESET_TIMEOUT);
+#else
+	S2LP_SendCommand(handle, S2LP_CMD_SRES);
+#endif
 }
 
+#ifndef S2LP_SOFTWARE_RESET
 void S2LP_Shutdown(S2LP_Handle* handle) {
 	S2LP_WritePin(handle, S2LP_PIN_SDN, true);
 }
@@ -187,6 +200,7 @@ void S2LP_Shutdown(S2LP_Handle* handle) {
 void S2LP_Wakeup(S2LP_Handle* handle) {
 	S2LP_WritePin(handle, S2LP_PIN_SDN, false);
 }
+#endif
 
 void S2LP_Delay(uint32_t milliseconds) {
 	osDelay(milliseconds);

@@ -19,7 +19,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include <stm32l1xx.h>
+#include <stm32l4xx.h>
+
+// In case when S2-LP CSD (shutdown) pin is not avaialble,
+// the library can issue software reset via SRES command
+// Define S2LP_SOFTWARE_RESET to enable this behaviour,
+// instead of using GPIO to reset spirit.
+#define S2LP_SOFTWARE_RESET 1
 
 typedef struct S2LP_Handle_t {
 	// S2-LP common handle fields - don't modify directly!
@@ -48,8 +54,10 @@ typedef struct S2LP_Handle_t {
 	uint16_t gpio_csn_pin;
 
 	// Shutdown pin
+#ifndef S2LP_SOFTWARE_RESET
 	GPIO_TypeDef* gpio_sdn_port;
 	uint16_t gpio_sdn_pin;
+#endif
 
 	// GPIO
 	GPIO_TypeDef* gpio_port[4];
@@ -58,8 +66,12 @@ typedef struct S2LP_Handle_t {
 
 // Functions below are implemented for STM32 HAL by default
 // change them for your preferred platform if you need
+
+// Init the handle. Don't change the default implementation, just add your
+// own code after it.
 void S2LP_InitHandle(S2LP_Handle* handle);
 
+// MCU GPIO I/O operations
 void S2LP_WritePin(S2LP_Handle* handle, S2LP_Pin pin, bool state);
 bool S2LP_ReadPin(S2LP_Handle* handle, S2LP_Pin pin);
 
@@ -69,7 +81,8 @@ void S2LP_Write(S2LP_Handle* handle, uint8_t address, size_t length);
 void S2LP_Read(S2LP_Handle* handle, uint8_t address, size_t amount);
 void S2LP_SendCommand(S2LP_Handle* handle, uint8_t command);
 
-// Millisecond delay
+// Millisecond delay. Make sure to use the correct one, depending on whether you use
+// RTOS (osDelay in that case), or not (HAL_Delay or your own implementation in that case)
 void S2LP_Delay(uint32_t milliseconds);
 
 // These are additional functions that depend directly on the functions above, so you
@@ -77,15 +90,18 @@ void S2LP_Delay(uint32_t milliseconds);
 
 // Helper functions for register access
 uint8_t S2LP_ReadRegister(S2LP_Handle* handle, S2LP_Register address);
-void S2LP_WriteRegister(S2LP_Handle* handle, S2LP_Register address, uint8_t new_value);
+void S2LP_WriteRegister(S2LP_Handle* handle, S2LP_Register address,
+		uint8_t new_value);
 
 // IMPORTANT: Make sure you set the correct address as start. S2LP registers are named
 // in reverse order relatively to the addresses, so for example register CRC_FIELD3 has
 // the "lowest" address (0xA6), while CRC_FIELD0 has the "highest" address (0xA9).
 // Therefore, if you'd want to do batch operation on all the CRC registers, you'd have
 // to set start_address = CRC_FIELD3 address, and amount = 4.
-void S2LP_BatchReadRegisters(S2LP_Handle* handle, S2LP_Register start_address, uint8_t* output, size_t amount);
-void S2LP_BatchWriteRegisters(S2LP_Handle* handle, S2LP_Register start_address, uint8_t* data, size_t amount);
+void S2LP_BatchReadRegisters(S2LP_Handle* handle, S2LP_Register start_address,
+		uint8_t* output, size_t amount);
+void S2LP_BatchWriteRegisters(S2LP_Handle* handle, S2LP_Register start_address,
+		uint8_t* data, size_t amount);
 
 // Chip select control
 void S2LP_Select(S2LP_Handle* handle);

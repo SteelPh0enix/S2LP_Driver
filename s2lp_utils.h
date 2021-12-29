@@ -30,7 +30,7 @@ char const* S2LP_Utils_DataCodingToString(S2LP_Data_Coding coding);
 uint32_t S2LP_Utils_CRCToInt(S2LP_CRC_Mode crc_mode);
 
 // Convert RSSI <-> dBm
-int8_t S2LP_Utils_RSSITodBm(uint8_t rssi);
-uint8_t S2LP_Utils_dBmToRSSI(int8_t dbm);
+int16_t S2LP_Utils_RSSITodBm(uint8_t rssi);
+int16_t S2LP_Utils_dBmToRSSI(int8_t dbm);
 
 #endif /* S2LP_S2LP_UTILS_H_ */

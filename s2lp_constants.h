@@ -8,6 +8,7 @@
 #ifndef S2LP_S2LP_CONSTANTS_H_
 #define S2LP_S2LP_CONSTANTS_H_
 
+// Datarate helper constants
 #define S2LP_DATARATE_EXPONENT_MIN 0
 #define S2LP_DATARATE_EXPONENT_MAX 15
 #define S2LP_DATARATE_EXPONENT_INVALID 0xFF
@@ -16,6 +17,7 @@
 #define S2LP_DATARATE_MIN 100
 #define S2LP_DATARATE_MAX 500000
 
+// Frequency deviation helper constants
 #define S2LP_FDEV_EXPONENT_MIN 0
 #define S2LP_FDEV_EXPONENT_MAX 15
 #define S2LP_FDEV_EXPONENT_INVALID 0xFF
